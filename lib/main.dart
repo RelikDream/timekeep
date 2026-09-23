@@ -7,7 +7,7 @@ void main() {
 /// Root widget of the app.
 class TimekeepApp extends StatelessWidget {
   /// Creates the root widget.
-  const TimekeepApp({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {
