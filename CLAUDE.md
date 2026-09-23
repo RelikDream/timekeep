@@ -21,9 +21,8 @@ Valeurs par défaut, toutes modifiables dans les réglages :
 | Paramètre | Défaut |
 |---|---|
 | Objectif journalier effectif | 7 h 45 (465 min) |
-| Début du rituel de coupure | 17:30 |
-| Heure de fin visée (soft) | 18:00 |
-| Limite dure (hard) | 18:30 |
+| Avance du rituel de coupure | 30 min avant la fin visée |
+| Marge avant la limite dure | 30 min après la fin visée |
 | Durée d'une prolongation | 20 min |
 | Prolongations max / semaine | 2 |
 | Seuil semaine vert | ≤ 39 h |
@@ -36,14 +35,23 @@ Valeurs par défaut, toutes modifiables dans les réglages :
 - **Statut du jour** (évalué dans cet ordre) :
   - `idle` : aucune session ouverte.
   - `extension` : prolongation active et non expirée.
-  - `stop` : maintenant ≥ limite dure **ou** effectif ≥ objectif + 60 min.
-  - `warn` : maintenant ≥ fin visée **ou** effectif ≥ objectif.
-  - `ritual` : maintenant ≥ début du rituel.
-  - `ok` : sinon. Afficher le temps restant et l'heure de fin prévue = `min(maintenant + restant, fin visée)`.
-- **Prolongation** : uniquement en `warn`/`stop`, avec une note facultative (une note vide s'affiche « Sans précision »), bloquée si quota hebdo atteint. La semaine va du lundi au dimanche.
+  - `stop` : effectif ≥ objectif + marge avant la limite.
+  - `warn` : effectif ≥ objectif.
+  - `ritual` : effectif ≥ objectif − avance du rituel.
+  - `ok` : sinon.
+  - Un seul statut à la fois : le premier qui s'applique dans cet ordre.
+- **Horaires calculés** (pas d'heures fixes) : tous les seuils portent sur le temps effectif. Les heures affichées en découlent, à partir de l'heure de début et des pauses : fin visée = maintenant + restant, heure du rituel = fin visée − avance, limite = fin visée + marge. Elles sont recalculées à chaque pause/reprise. Afficher le temps restant, l'heure du rituel et la fin visée.
+- **Prolongation** : uniquement en `warn`/`stop`. La semaine va du lundi au dimanche.
+  - Les 20 min partent du moment où il aurait fallu s'arrêter, pas du clic (l'utilisateur peut oublier de cliquer) : passage en `warn` si demandée en `warn`, passage en `stop` si demandée en `stop`, fin de la précédente pour une prolongation qui en suit une autre.
+  - 1ʳᵉ du jour : un tap, note facultative (une note vide s'affiche « Sans précision »).
+  - 2ᵉ le même jour : plus difficile — note de justification du dépassement obligatoire, appui long de 3 s, puis confirmation.
+  - Quota hebdo atteint : bouton bloqué, sauf contournement exceptionnel volontairement pénible (recopier « Je dépasse volontairement ma limite » + note de justification obligatoire). Le contournement ne compte pas dans le quota mais est tracé à part (vue semaine, bilan annuel).
+  - Pendant une prolongation, les rappels qui tomberaient dedans sont annulés ; un seul rappel à sa fin.
 - **Rituel de coupure** : 5 étapes cochables — finir ou geler / écrire la prochaine étape (texte) / vider sa tête / regarder demain (texte : 1 à 3 priorités) / fermer vraiment. Bouton « Journée terminée » : ferme la session, marque le jour comme terminé, fonctionne même si le rituel est incomplet.
 - **Pour reprendre** : ce qu'il faut se rappeler pour recommencer à la session de travail suivante. Si l'effectif du jour < 45 min, afficher la dernière note « prochaine étape » + priorités du dernier jour qui en contient.
-- **Repos légaux** (alertes, jamais bloquantes) : moins de 11 h entre l'heure de fin du travail (fin de la dernière session) et le début de la session suivante ; travail le samedi ou le dimanche.
+- **Repos légaux** (alertes, jamais bloquantes) : moins de 11 h entre l'heure de fin du travail (fin de la dernière session de la journée précédente) et la première session du jour ; travail le samedi ou le dimanche.
+- **Reprise après « Journée terminée »** : autorisée, la journée est rouverte et les rappels replanifiés. Si 11 h ne se sont pas écoulées depuis la fin du travail, afficher une alerte avec confirmation.
+- **Pour reprendre** utilise les dernières notes écrites avant la session en cours, y compris celles du jour même.
 - Une journée qui dépasse minuit reste rattachée au jour de son début.
 
 ## Stack
@@ -101,7 +109,7 @@ flutter run
 - Une user story à la fois, référencée par son ID (`US-xx`) dans `docs/backlog.md`.
 - Chaque story ne crée que le stockage dont elle a besoin (pas de table anticipée), mais le plan explique comment il s'articulera avec les stories suivantes.
 - Avant de coder : **résumer le plan en quelques lignes et attendre ma validation** si la story touche plus de 3 fichiers ou ajoute une dépendance.
-- Domaine en **TDD** : tests d'abord, notamment pour les bornes (pile à 18:00, pile à l'objectif, quota atteint, passage de minuit).
+- Domaine en **TDD** : tests d'abord, notamment pour les bornes (pile à l'objectif, pile au rituel, pile à la limite, quota atteint, passage de minuit).
 - Terminer chaque story par `flutter analyze` sans warning et `flutter test` vert.
 - Commits conventionnels en anglais (`feat(today): ...`, `test(domain): ...`), un commit par étape logique.
 - Cocher la story dans `docs/backlog.md` une fois terminée.

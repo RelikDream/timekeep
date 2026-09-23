@@ -34,7 +34,7 @@ US-00 → US-01 → US-02 → US-03 → US-04a → US-09 → US-10 → US-05 →
 **En tant que** développeur, **je veux** un projet Flutter propre et outillé **afin de** démarrer sur de bonnes bases.
 
 Critères d'acceptation :
-- Projet Android uniquement, package `fr.thomas.pointage` (modifiable), minSdk 26.
+- Projet Android uniquement, package `fr.relikdream.timekeep`, minSdk 26.
 - Arborescence de `CLAUDE.md` créée (dossiers vides avec `.gitkeep`).
 - `very_good_analysis` configuré, `flutter analyze` sans warning.
 - Abstraction `Clock` dans `domain/` avec une implémentation système et une implémentation de test.
@@ -58,7 +58,7 @@ Critères d'acceptation :
 - Entités : `Session`, `WorkDay`, `WorkKind`, `Settings`, `Extension`, `ShutdownRitual`.
 - `StatusCalculator` renvoie `idle | ok | ritual | warn | extension | stop`, avec temps restant et heure de fin prévue, selon l'ordre défini dans `CLAUDE.md`.
 - `WeekSummary` : total, répartition client/Zenika, zone vert/orange/rouge, prolongations utilisées.
-- Tests aux bornes : pile à l'objectif, pile à 17:30 / 18:00 / 18:30, objectif + 60 min, prolongation expirée à la seconde près, session qui passe minuit, semaine du lundi au dimanche.
+- Tests aux bornes : pile à l'objectif − avance du rituel, pile à l'objectif, pile à l'objectif + marge, horaires recalculés après une pause, départ de prolongation (warn, stop, enchaînée), prolongation expirée à la seconde près, session qui passe minuit, semaine du lundi au dimanche.
 
 Prompt :
 ```
@@ -138,7 +138,7 @@ Critères d'acceptation :
 **En tant qu'**utilisateur qui ne voit pas l'heure passer, **je veux** être alerté au début du rituel, à la fin visée et à la limite **afin de** m'arrêter à temps.
 
 Critères d'acceptation :
-- Trois notifications, avec le son d'alarme (non coupées par « Ne pas déranger ») : rituel, fin (« objectif atteint »), limite. Chacune au plus tôt entre l'heure réglée et le moment où le temps effectif atteint le seuil correspondant.
+- Trois notifications, avec le son d'alarme (non coupées par « Ne pas déranger ») : rituel, fin (« objectif atteint »), limite. Chacune au moment où le temps effectif atteint le seuil correspondant (horaires calculés, voir `CLAUDE.md`).
 - Replanification à chaque démarrage, pause, changement de réglage, correction d'horaires et au boot.
 - Pas de rappel si la journée est terminée ou en pause ; pas de doublon.
 - Tap sur la notification → écran Aujourd'hui avec la bonne action mise en avant.
@@ -156,8 +156,9 @@ avançant l'heure du téléphone.
 
 Critères d'acceptation :
 - Proposée en `warn` et `stop`, depuis l'écran et depuis la notification de fin.
-- Note facultative (champ texte) ; une note vide s'affiche « Sans précision » (vue semaine, lendemain).
-- Compteur « x/2 cette semaine » ; bouton désactivé au quota avec message incitant à noter la prochaine étape.
+- Départ, difficulté croissante et contournement : voir règles de prolongation dans `CLAUDE.md`.
+- Note facultative pour la 1ʳᵉ du jour ; une note vide s'affiche « Sans précision » (vue semaine, lendemain). Note de justification obligatoire pour la 2ᵉ du jour et le contournement.
+- Compteur « x/2 cette semaine » ; bouton désactivé au quota avec message incitant à noter la prochaine étape, et accès discret au contournement exceptionnel.
 - Replanifie un rappel à la fin de la prolongation.
 
 ### [ ] US-09 — Rituel de coupure
@@ -188,7 +189,7 @@ Critères d'acceptation :
 **En tant qu'**utilisateur, **je veux** ajuster mes seuils **afin que** l'app colle à mon organisation.
 
 Critères d'acceptation :
-- Tous les paramètres du tableau de `CLAUDE.md`, avec validation (rituel < fin visée < limite).
+- Tous les paramètres du tableau de `CLAUDE.md`, avec validation (avance du rituel et marge avant la limite > 0 et < objectif).
 - Toute modification replanifie les rappels.
 
 ### [ ] US-13 — Alertes repos et week-end
