@@ -30,7 +30,7 @@ US-00 → US-01 → US-02 → US-03 → US-04a → US-09 → US-10 → US-05 →
 
 ## v0 — Socle
 
-### [ ] US-00 — Initialiser le projet
+### [x] US-00 — Initialiser le projet
 **En tant que** développeur, **je veux** un projet Flutter propre et outillé **afin de** démarrer sur de bonnes bases.
 
 Critères d'acceptation :
