@@ -22,6 +22,10 @@ Implémente US-XX de docs/backlog.md en suivant CLAUDE.md.
 4. Coche la story et résume ce que je dois vérifier manuellement sur le téléphone.
 ```
 
+## Ordre de réalisation (v0 + v1)
+
+US-00 → US-01 → US-02 → US-03 → US-04a → US-09 → US-10 → US-05 → US-07 → US-06 → US-08 → US-11 → US-04b → US-12 → US-13 → US-14
+
 ---
 
 ## v0 — Socle
@@ -34,7 +38,7 @@ Critères d'acceptation :
 - Arborescence de `CLAUDE.md` créée (dossiers vides avec `.gitkeep`).
 - `very_good_analysis` configuré, `flutter analyze` sans warning.
 - Abstraction `Clock` dans `domain/` avec une implémentation système et une implémentation de test.
-- `.gitlab-ci.yml` : jobs `analyze` et `test` sur image Flutter stable.
+- GitHub Actions (`.github/workflows/ci.yml`) : jobs `analyze` et `test` sur Flutter stable.
 - README court : lancer, tester, générer le code.
 
 Prompt :
@@ -97,12 +101,14 @@ pour chaque statut.
 ```
 
 ### [ ] US-04 — Corriger ses horaires
+
+Découpée en deux : **US-04a** (jour courant, juste après US-03) et **US-04b** (jours passés, après US-11).
 **En tant qu'**utilisateur qui a oublié de pointer, **je veux** modifier ou ajouter des plages **afin que** mes totaux restent justes.
 
 Critères d'acceptation :
-- Liste des sessions du jour : modifier début/fin, changer le type, supprimer, ajouter une plage.
-- Validation : fin > début, pas de chevauchement, pas de fin dans le futur ; message clair sinon.
-- Possible aussi sur un jour passé de la semaine (depuis la vue semaine, US-10).
+- US-04a — Liste des sessions du jour : modifier début/fin, changer le type, supprimer, ajouter une plage.
+- US-04a — Validation : fin > début, pas de chevauchement, pas de fin dans le futur ; message clair sinon.
+- US-04b — Possible aussi sur un jour passé de la semaine (depuis la vue semaine, US-11).
 
 ### [ ] US-05 — Permissions et fiabilité Android
 **En tant qu'**utilisateur, **je veux** que les rappels arrivent vraiment **afin de** pouvoir compter dessus.
@@ -132,7 +138,7 @@ Critères d'acceptation :
 **En tant qu'**utilisateur qui ne voit pas l'heure passer, **je veux** être alerté au début du rituel, à la fin visée et à la limite **afin de** m'arrêter à temps.
 
 Critères d'acceptation :
-- Trois notifications : rituel, fin (« objectif atteint »), limite. Chacune au plus tôt entre l'heure réglée et le moment où le temps effectif atteint le seuil correspondant.
+- Trois notifications, avec le son d'alarme (non coupées par « Ne pas déranger ») : rituel, fin (« objectif atteint »), limite. Chacune au plus tôt entre l'heure réglée et le moment où le temps effectif atteint le seuil correspondant.
 - Replanification à chaque démarrage, pause, changement de réglage, correction d'horaires et au boot.
 - Pas de rappel si la journée est terminée ou en pause ; pas de doublon.
 - Tap sur la notification → écran Aujourd'hui avec la bonne action mise en avant.
@@ -150,7 +156,7 @@ avançant l'heure du téléphone.
 
 Critères d'acceptation :
 - Proposée en `warn` et `stop`, depuis l'écran et depuis la notification de fin.
-- Note obligatoire (champ texte ; défaut « Sans précision »).
+- Note facultative (champ texte) ; une note vide s'affiche « Sans précision » (vue semaine, lendemain).
 - Compteur « x/2 cette semaine » ; bouton désactivé au quota avec message incitant à noter la prochaine étape.
 - Replanifie un rappel à la fin de la prolongation.
 

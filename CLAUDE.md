@@ -40,10 +40,10 @@ Valeurs par défaut, toutes modifiables dans les réglages :
   - `warn` : maintenant ≥ fin visée **ou** effectif ≥ objectif.
   - `ritual` : maintenant ≥ début du rituel.
   - `ok` : sinon. Afficher le temps restant et l'heure de fin prévue = `min(maintenant + restant, fin visée)`.
-- **Prolongation** : uniquement en `warn`/`stop`, note obligatoire (défaut « Sans précision »), bloquée si quota hebdo atteint. La semaine va du lundi au dimanche.
+- **Prolongation** : uniquement en `warn`/`stop`, avec une note facultative (une note vide s'affiche « Sans précision »), bloquée si quota hebdo atteint. La semaine va du lundi au dimanche.
 - **Rituel de coupure** : 5 étapes cochables — finir ou geler / écrire la prochaine étape (texte) / vider sa tête / regarder demain (texte : 1 à 3 priorités) / fermer vraiment. Bouton « Journée terminée » : ferme la session, marque le jour comme terminé, fonctionne même si le rituel est incomplet.
-- **Pour reprendre** : si l'effectif du jour < 45 min, afficher la dernière note « prochaine étape » + priorités du dernier jour qui en contient.
-- **Repos légaux** (alertes, jamais bloquantes) : moins de 11 h entre la fin de la veille et le début du jour ; travail le samedi ou le dimanche.
+- **Pour reprendre** : ce qu'il faut se rappeler pour recommencer à la session de travail suivante. Si l'effectif du jour < 45 min, afficher la dernière note « prochaine étape » + priorités du dernier jour qui en contient.
+- **Repos légaux** (alertes, jamais bloquantes) : moins de 11 h entre l'heure de fin du travail (fin de la dernière session) et le début de la session suivante ; travail le samedi ou le dimanche.
 - Une journée qui dépasse minuit reste rattachée au jour de son début.
 
 ## Stack
@@ -51,7 +51,7 @@ Valeurs par défaut, toutes modifiables dans les réglages :
 - Flutter stable, Dart 3, **Android uniquement** (minSdk 26, targetSdk dernier stable).
 - État : `flutter_riverpod` (+ `riverpod_annotation` / `riverpod_generator`).
 - Persistance : `drift` (SQLite) + `drift_dev`, `build_runner`.
-- Notifications planifiées : `flutter_local_notifications` + `timezone` (fuseau Europe/Paris).
+- Notifications planifiées : `flutter_local_notifications` + `timezone`. Horodatages stockés en UTC, calculs faits dans le fuseau horaire actuel du téléphone.
 - Chrono permanent : `flutter_foreground_task`.
 - Lints : `very_good_analysis`.
 - Tests : `flutter_test`, `mocktail`. L'horloge est toujours injectée (`Clock` abstraite), jamais `DateTime.now()` en dur dans le domaine ou les services.
@@ -92,12 +92,14 @@ flutter run
 - Android 13+ : demander `POST_NOTIFICATIONS` au premier lancement, avec écran d'explication.
 - Android 12+ : alarmes exactes (`SCHEDULE_EXACT_ALARM`) ; si refusé, basculer en inexact et le signaler dans l'UI.
 - Android 14+ : déclarer le `foregroundServiceType` du service chrono dans le manifeste.
+- Les rappels utilisent le canal et le son d'alarme (usage audio `alarm`) pour ne pas être coupés par « Ne pas déranger ».
 - Proposer d'exclure l'app de l'optimisation batterie (lien vers les réglages système), sans l'imposer.
 - Reprogrammer les rappels au boot (`RECEIVE_BOOT_COMPLETED`) et à chaque changement d'état.
 
 ## Façon de travailler
 
 - Une user story à la fois, référencée par son ID (`US-xx`) dans `docs/backlog.md`.
+- Chaque story ne crée que le stockage dont elle a besoin (pas de table anticipée), mais le plan explique comment il s'articulera avec les stories suivantes.
 - Avant de coder : **résumer le plan en quelques lignes et attendre ma validation** si la story touche plus de 3 fichiers ou ajoute une dépendance.
 - Domaine en **TDD** : tests d'abord, notamment pour les bornes (pile à 18:00, pile à l'objectif, quota atteint, passage de minuit).
 - Terminer chaque story par `flutter analyze` sans warning et `flutter test` vert.
